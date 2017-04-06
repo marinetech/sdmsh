@@ -1,4 +1,4 @@
-#define _GNU_SOURCE         
+#define _GNU_SOURCE
 #include <stdio.h> /* asprintf() */
 
 #include <stdlib.h>
@@ -9,7 +9,7 @@
 #include <commands.h>
 #include <logger.h>
 
-char *prompt = "# ";
+char *prompt;
 int   shell_quit = 0;
 char *shell_input = NULL;
 char *history_file = NULL;
@@ -45,18 +45,18 @@ char* shell_rl_find_completion(const char *text, int index)
 }
 
 char* shell_rl_cmd_gen(const char *text, int state)
-{   
+{
     static int list_index;
     char *name;
-    
+
     if (!state)
         list_index = 0;
-    
+
     if ((name = shell_rl_find_completion(text, list_index)) != NULL) {
-        list_index++; 
+        list_index++;
         return strdup(name);
-    } 
-        
+    }
+
     return NULL;
 }
 
@@ -78,7 +78,7 @@ char** shell_cb_completion(const char *text, int start, int end)
     }
 
     return matches;
-}   
+}
 
 char* shell_rl_hook_dummy(const char *text, int state)
 {
@@ -86,19 +86,30 @@ char* shell_rl_hook_dummy(const char *text, int state)
     return NULL;
 }
 
-void shell_init(char *progname)
+void shell_init(char *progname, FILE *input, char *prompt_)
 {
     char *homedir = getenv("HOME");
-    if (homedir) {
-        asprintf(&history_file, "%s/.%s_history", homedir, progname);
-        read_history(history_file);
+
+    if (input != stdin || !isatty(STDIN_FILENO)) {
+        prompt = strdup("");
+        rl_instream = input;
+        rl_outstream = input;
+    } else {
+        prompt = strdup(prompt_);
+        rl_instream = stdin;
+        rl_outstream = stdout;
+
+        if (homedir) {
+            asprintf(&history_file, "%s/.%s_history", homedir, progname);
+            read_history(history_file);
+        }
+
+        /* Allow conditional parsing of the ~/.inputrc file. */
+        rl_readline_name = progname;
+        rl_attempted_completion_function = shell_cb_completion;
+        rl_completion_entry_function = shell_rl_hook_dummy;
     }
     rl_callback_handler_install(prompt, (rl_vcpfunc_t*) &rl_cb_getline);
-
-    /* Allow conditional parsing of the ~/.inputrc file. */
-    rl_readline_name = progname;
-    rl_attempted_completion_function = shell_cb_completion;
-    rl_completion_entry_function = shell_rl_hook_dummy;
 }
 
 void shell_deinit()
@@ -110,6 +121,7 @@ void shell_deinit()
     }
 
     rl_callback_handler_remove();
+    free(prompt);
 }
 
 int shell_handle()
@@ -164,12 +176,14 @@ int shell_run_cmd()
             printf ("\r");
             cmd->handler(argv, argc);
             rl_forced_update_display();
-            break; 
+            break;
         }
     }
 
-    if (cmd->name == NULL)
+    if (cmd->name == NULL) {
         fprintf(stderr, "\rUnknown command: %s\n", argv[0]);
+        rl_forced_update_display();
+    }
 
     free(argv);
     free(shell_input);
