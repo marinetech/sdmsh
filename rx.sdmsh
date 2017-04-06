@@ -1,0 +1,6 @@
+config 350 0 3
+ref /tmp/ref
+rx 125000 /tmp/rx
+rx 125000 /tmp/rx1
+rx 125000 /tmp/rx2
+

@@ -1,0 +1,4 @@
+config 350 0 3
+tx /tmp/tx.txt
+tx /tmp/tx.txt
+tx /tmp/tx

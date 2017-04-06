@@ -13,8 +13,8 @@
 
 #include <readline/readline.h>
 
-#include <sdm.h>
-#include <logger.h>
+#include "sdm.h"
+#include "logger.h"
 
 #define ADD_TO_DATA_VAL16bit(data, data_size, data_offset, val) \
     ADD_TO_DATA_VAL(2, data, data_size, data_offset, val)
@@ -45,7 +45,7 @@ int sdm_connect(char *ip, int port)
     struct sockaddr_in serveraddr;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) 
+    if (sockfd < 0)
         err(1, "socket(): ");
 
     memset((char *)&serveraddr, 0, sizeof(serveraddr));
@@ -53,7 +53,7 @@ int sdm_connect(char *ip, int port)
     serveraddr.sin_family = AF_INET;
     serveraddr.sin_port = htons(port);
 
-    if (connect(sockfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0) 
+    if (connect(sockfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0)
         err(1, "connect(): ");
 
     return sockfd;
@@ -135,7 +135,7 @@ char* sdm_cmd_to_str(uint8_t cmd)
 char* sdm_reply_to_str(uint8_t cmd)
 {
     switch (cmd) {
-        case SDM_REPLAY_STOP:   return "STOP";    
+        case SDM_REPLAY_STOP:   return "STOP";
         case SDM_REPLAY_RX:     return "RX";
         case SDM_REPLAY_BUSY:   return "BUSY";
         case SDM_REPLAY_REPORT: return "REPORT";
@@ -358,11 +358,10 @@ int sdm_extract_replay(char *buf, size_t len, sdm_pkt_t **cmd)
 
 void smd_rcv_idle_state()
 {
-    rl_clear_message();
+    //rl_clear_message();
     if (sdm_rcv.filename)
         free(sdm_rcv.filename);
     sdm_rcv.state = SDM_STATE_IDLE;
     sdm_rcv.filename = NULL;
     sdm_rcv.data_len = 0;
 }
-
