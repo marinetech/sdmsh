@@ -33,7 +33,7 @@ class sdmControl:
     """Evologics SDM python wraper."""
 
     def __init__(self):
-        """Constractor."""
+        """Constructor."""
         self.modems = []
         self.conn = {}
         self.sdm = ctypes.CDLL('sdm.so')
@@ -63,29 +63,30 @@ class sdmControl:
     def ATP(self, modemIP):
         """Change the modem to physical mode."""
         sock = socket.create_connection((modemIP, 9200), 2)
-        sock.send('AT?S\n')
-        if ("PHY" not in sock.recv(1024)):
-            sock.send('ATP\n')
+        sock.send(b'AT?S\n')
+        if (b'PHY' not in sock.recv(1024)):
+            sock.send(b'ATP\n')
             sock.recv(1024)
 
     def connect(self):  # , modemIP):
         """Connect to the modem."""
-        print(self.modems)
+        # print("self.modems : " + self.modems)
         for m in self.modems:
+            print("m : " + str(m))
             self.conn[m] = self.sdm.sdm_connect(m, 4200)
-            print("modem : " + str(m) + "\tconn : " + str(self.conn[m]))
-            print(self.sdm.sdm_send_cmd(self.conn[m], self.SDM_CMD_STOP))
-            print(self.sdm.sdm_send_cmd(self.conn[m],
-                                        self.SDM_CMD_CONFIG,
-                                        300,
-                                        5,
-                                        3))
-            with open('/tmp/tx') as f:
-                content = f.readlines()
-            # a = array.array("h", range(len(content)))
-            content = [bytes(x.strip()) for x in content]
-            print(content[:100])
-            print(self.sdm.sdm_load_samples('/tmp/tx', len(content)))
+            # print("modem : " + str(m) + "\tconn : " + str(self.conn[m]))
+            # print(self.sdm.sdm_send_cmd(self.conn[m], self.SDM_CMD_STOP))
+            # print(self.sdm.sdm_send_cmd(self.conn[m],
+            #                             self.SDM_CMD_CONFIG,
+            #                             300,
+            #                             5,
+            #                             3))
+            # with open('/tmp/tx') as f:
+            #     content = f.readlines()
+            # # a = array.array("h", range(len(content)))
+            # content = [bytes(x.strip()) for x in content]
+            # print(content[:100])
+            # print(self.sdm.sdm_load_samples('/tmp/tx', len(content)))
             # print(self.sdm.sdm_send_cmd(self.conn[m],
             #                             self.SDM_CMD_TX, content, 4))
 
@@ -93,4 +94,6 @@ class sdmControl:
 s = sdmControl()
 s.ATP("192.168.0.148")
 s.addModem("192.168.0.148")
+s.ATP("192.168.0.147")
+s.addModem("192.168.0.147")
 s.connect()
