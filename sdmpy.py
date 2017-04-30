@@ -2,7 +2,7 @@
 
 import ctypes
 import socket
-import array
+# import array
 
 # int   sdm_connect(char *ip, int port);
 # int   sdm_send_cmd(int sockfd, int cmd_code, ...);
